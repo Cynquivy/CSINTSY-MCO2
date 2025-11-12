@@ -18,7 +18,7 @@ def map_label_from_row(row):
             is_correct = True
     else:
         is_correct = True
-    if (pd.notna(row.get('corrected_label')) and (str(is_correct).strip().lower() in ['false','0','no'])):
+    if (pd.notna(row.get('corrected_label')) and (str(is_correct).strip().lower() in ['false','0','no','F'])):
         raw = row.get('corrected_label')
     else:
         raw = row.get('label') # Backup incase is_correct is empty (not accurate)
