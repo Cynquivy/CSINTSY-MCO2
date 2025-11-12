@@ -77,7 +77,7 @@ MODEL_FILE = os.path.join(BASE_DIR, 'model.joblib')
 if os.path.exists(MODEL_FILE):
     _model_bundle = joblib.load(MODEL_FILE)
 else:
-    raise FileNotFoundError(f"model.joblib not found in {BASE_DIR}. Train the model and save 'model.joblib' before using pinoybot.")
+    raise FileNotFoundError(f"model.joblib not found in {BASE_DIR}. Train the model using train.py and save model.joblib before using pinoybot.")
 
 if not isinstance(_model_bundle, dict) or 'clf' not in _model_bundle:
     raise RuntimeError("model.joblib must be a dict containing at least the key 'clf' and preferably 'vec'.")
