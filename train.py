@@ -48,9 +48,20 @@ def manual_features_list(tokens):
         f_has_nonalpha = int(any(not ch.isalpha() for ch in t))
         vowels = sum(1 for ch in t.lower() if ch in 'aeiou')
         f_vowel_ratio = vowels / f_len if f_len>0 else 0.0
-        suf_fil = int(any(t.lower().endswith(s) for s in ['an','in','hin','um','mag','nag','pin','pina','ka','ng']))
-        suf_eng = int(any(t.lower().endswith(s) for s in ['ing','ed','ion','ment','ly','able']))
-        feats.append([f_has_digit, f_has_hyphen, f_is_title, f_len, f_has_nonalpha, f_vowel_ratio, suf_fil, suf_eng])
+        suf_fil = int(any(t.lower().endswith(s) for s in [
+            'hin','han','pin','an','in','ka','ng']))
+        suf_eng = int(any(t.lower().endswith(s) for s in [
+            'ment','able','ing','ion','ed','ly'
+            ]))
+        pref_fil = int(any(t.lower().startswith(s) for s in [
+            'mag','nag','pag','tag','pa','ma','na','maka','makipag','maki',
+            'paki','ipag','ika','nagpa','magpa','pinaka','pinag','taga','tiga'
+            ]))
+        pref_eng = int(any(t.lower().startswith(s) for s in [
+            'un','re','in','im','ir','il','dis','non','over','mis','sub','pre',
+            'inter','trans','super','semi','anti','de','en','em','be','fore','out','under'
+            ]))
+        feats.append([f_has_digit, f_has_hyphen, f_is_title, f_len, f_has_nonalpha, f_vowel_ratio, suf_fil, suf_eng, pref_fil, pref_eng])
     return np.array(feats, dtype=float)
 
 def main():
