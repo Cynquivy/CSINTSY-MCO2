@@ -13,7 +13,10 @@ MANUAL_FEATURE_NAMES = [
     'has_nonalpha',   # punctuation/symbols
     'vowel_ratio',    # vowel density
     'suf_fil',        # Filipino affixes
-    'suf_eng'         # English affixes
+    'suf_eng',        # English affixes
+    'pref_fil',       # Filipino prefixes
+    'pref_eng'        # English prefixes
+
 ]
 
 def extract_feature_map(token: str):
@@ -32,10 +35,19 @@ def extract_feature_map(token: str):
     vowels = sum(1 for ch in t.lower() if ch in 'aeiou')
     f_vowel_ratio = (vowels / f_len) if f_len > 0 else 0.0
     suf_fil = any(t.lower().endswith(s) for s in [
-        'an','in','hin','um','mag','nag','pin','pina','ka','ng'
+        'hin','han','pin','an','in','ka','ng'
     ])
     suf_eng = any(t.lower().endswith(s) for s in [
         'ing','ed','ion','ment','ly','able'
+    ])
+    pref_fil = any(t.lower().startswith(s) for s in [
+        'mag','nag','pag','tag','pa','ma','na',
+        'maka','makipag','maki','paki','ipag','ika',
+        'nagpa','magpa','pinaka','pinag','taga','tiga'
+    ])
+    pref_eng = any(t.lower().startswith(s) for s in [
+        'un','re','in','im','ir','il','dis','non','over','mis','sub','pre',
+        'inter','trans','super','semi','anti','de','en','em','be','fore','out','under'
     ])
 
     return {
@@ -46,7 +58,9 @@ def extract_feature_map(token: str):
         'has_nonalpha': f_has_nonalpha,
         'vowel_ratio': f_vowel_ratio,
         'suf_fil': suf_fil,
-        'suf_eng': suf_eng
+        'suf_eng': suf_eng,
+        'pref_fil': pref_fil,
+        'pref_eng': pref_eng
     }
 
 def manual_features_array(tokens: List[str]):
