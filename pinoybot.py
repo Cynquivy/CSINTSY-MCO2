@@ -18,7 +18,7 @@ MANUAL_FEATURE_NAMES = [
     'pref_eng',       # English prefixes
     'func_fil',       # Filipino function words
     'func_eng',       # English function words
-    'eng_letters'    # presence of letters c, x, j, z, q, f
+    'eng_letters'     # presence of letters c, x, j, z, q, f
 ]
 
 def extract_feature_map(token: str):
@@ -175,9 +175,21 @@ def tag_language(tokens: List[str]) -> List[str]:
 
     return results
 
+# Main (Input Getter)
 if __name__ == "__main__":
-    # Input (to be changed to accept user input)
+    """
+    Input, extract tokens and determine tags
+
+    Example:
     sample = ['i','xxx','she','they','them','he','it','we','do','does','did','can','will','cannot','is',
        'am','are','have','has','a','an','the','and','or','else','but','if','then','in','on','at','of','for','with']
     print("Tokens:", sample)
     print("Tags :", tag_language(sample))
+    """
+    
+    print("Input a string: ", end="")
+    string = input().split()
+    print("Tokens:", string)
+    print("Tags:  ", tag_language(string))
+
+    

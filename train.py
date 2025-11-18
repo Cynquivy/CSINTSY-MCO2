@@ -9,7 +9,9 @@ import numpy as np
 
 DATA_XLSX = [
     Path('CSINTSY MCO2 Dataset (ID 572-624 Corrected).xlsx'),
-    Path('Data-Set.xlsx'),
+    Path('CSINTSY MCO2 Ulrich Dataset.xlsx'),
+    Path('CSINTSY MCO2 Darryl Dataset.xlsx'),
+    Path('CSINTSY MCO2 Borrowed Dataset.xlsx')
 ]   # REPLACE WITH FILENAME OF DATASET
 
 def load_multiple_datasets(files):
