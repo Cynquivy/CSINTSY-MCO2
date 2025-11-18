@@ -15,8 +15,10 @@ MANUAL_FEATURE_NAMES = [
     'suf_fil',        # Filipino affixes
     'suf_eng',        # English affixes
     'pref_fil',       # Filipino prefixes
-    'pref_eng'        # English prefixes
-
+    'pref_eng',       # English prefixes
+    'func_fil',       # Filipino function words
+    'func_eng',       # English function words
+    'eng_letters'    # presence of letters c, x, j, z, q, f
 ]
 
 def extract_feature_map(token: str):
@@ -38,7 +40,7 @@ def extract_feature_map(token: str):
         'hin','han','pin','an','in','ka','ng'
     ])
     suf_eng = any(t.lower().endswith(s) for s in [
-        'ing','ed','ion','ment','ly','able'
+        'ing','ed','ion','ment','ly','able','ness','ful','less','est','er'
     ])
     pref_fil = any(t.lower().startswith(s) for s in [
         'mag','nag','pag','tag','pa','ma','na',
@@ -49,6 +51,15 @@ def extract_feature_map(token: str):
         'un','re','in','im','ir','il','dis','non','over','mis','sub','pre',
         'inter','trans','super','semi','anti','de','en','em','be','fore','out','under'
     ])
+    func_fil = any(t.lower() == s for s in [
+        'ang', 'mga', 'para', 'sa', 'kapag', 'habang', 'kasi', 'dahil', 'ako', 
+        'siya', 'ka', 'ikaw', 'sila', 'tayo', 'nila'
+    ])
+    func_eng = any(t.lower() == s for s in [
+        'i','you','she','they','them','he','it','we','does','did','can','will','cannot','is',
+        'are','have','and','or','else','but','if','then'
+    ])
+    eng_letters = any(s in t.lower() for s in ['c','x','j','z','q','f'])
 
     return {
         'has_digit': f_has_digit,
@@ -60,7 +71,10 @@ def extract_feature_map(token: str):
         'suf_fil': suf_fil,
         'suf_eng': suf_eng,
         'pref_fil': pref_fil,
-        'pref_eng': pref_eng
+        'pref_eng': pref_eng,
+        'func_fil': func_fil,
+        'func_eng': func_eng,
+        'eng_letters': eng_letters
     }
 
 def manual_features_array(tokens: List[str]):
@@ -85,6 +99,13 @@ def quick_oth(token: str) -> bool:
         return True
     return False
 
+SHORT_ENG_WORDS = {
+    'do','am','a','an','the','in','on','at','of','for','with','has'
+}
+# ENG short words 
+def quick_eng(token: str) -> bool:
+    return token.lower() in SHORT_ENG_WORDS
+
 BASE_DIR = os.path.dirname(__file__)
 MODEL_FILE = os.path.join(BASE_DIR, 'model.joblib')
 
@@ -101,7 +122,6 @@ _vec = _model_bundle.get('vec')
 
 
 # Main Function
-
 def tag_language(tokens: List[str]) -> List[str]:
     if tokens is None:
         return []
@@ -114,6 +134,8 @@ def tag_language(tokens: List[str]) -> List[str]:
     for i, t in enumerate(tokens):
         if quick_oth(t):
             results[i] = 'OTH'
+        elif quick_eng(t):
+            results[i] = 'ENG'
         else:
             to_predict_indices.append(i)
             to_predict_tokens.append(t)
@@ -155,6 +177,7 @@ def tag_language(tokens: List[str]) -> List[str]:
 
 if __name__ == "__main__":
     # Input (to be changed to accept user input)
-    sample = ["Love", "kita", ".", "Nag-lunch", "2023", "Rizal", "playing"]
+    sample = ['i','xxx','she','they','them','he','it','we','do','does','did','can','will','cannot','is',
+       'am','are','have','has','a','an','the','and','or','else','but','if','then','in','on','at','of','for','with']
     print("Tokens:", sample)
     print("Tags :", tag_language(sample))

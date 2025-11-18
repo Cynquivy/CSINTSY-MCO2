@@ -7,7 +7,18 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
 
-DATA_XLSX = Path('CSINTSY MCO2 Dataset (ID 572-624 Corrected).xlsx')  # REPLACE WITH FILENAME OF DATASET
+DATA_XLSX = [
+    Path('CSINTSY MCO2 Dataset (ID 572-624 Corrected).xlsx'),
+    Path('Data-Set.xlsx'),
+]   # REPLACE WITH FILENAME OF DATASET
+
+def load_multiple_datasets(files):
+    dfs = []
+    for f in files:
+        print(f"Loading: {f}")
+        df = pd.read_excel(f)
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True)
 
 def map_label_from_row(row):
     raw = None
@@ -18,7 +29,7 @@ def map_label_from_row(row):
             is_correct = True
     else:
         is_correct = True
-    if (pd.notna(row.get('corrected_label')) and (str(is_correct).strip().lower() in ['false','0','no','F'])):
+    if (pd.notna(row.get('corrected_label')) and (str(is_correct).strip().lower() in ['false','0','no','f'])):
         raw = row.get('corrected_label')
     else:
         raw = row.get('label') # Backup incase is_correct is empty (not accurate)
@@ -51,7 +62,7 @@ def manual_features_list(tokens):
         suf_fil = int(any(t.lower().endswith(s) for s in [
             'hin','han','pin','an','in','ka','ng']))
         suf_eng = int(any(t.lower().endswith(s) for s in [
-            'ment','able','ing','ion','ed','ly'
+            'ing','ed','ion','ment','ly','able','ness','ful','less','est','er'
             ]))
         pref_fil = int(any(t.lower().startswith(s) for s in [
             'mag','nag','pag','tag','pa','ma','na','maka','makipag','maki',
@@ -61,11 +72,25 @@ def manual_features_list(tokens):
             'un','re','in','im','ir','il','dis','non','over','mis','sub','pre',
             'inter','trans','super','semi','anti','de','en','em','be','fore','out','under'
             ]))
-        feats.append([f_has_digit, f_has_hyphen, f_is_title, f_len, f_has_nonalpha, f_vowel_ratio, suf_fil, suf_eng, pref_fil, pref_eng])
+        func_fil = int(t.lower() in [
+            'ang','ng','mga','para','sa','kapag','habang','kasi','dahil','ako',
+            'siya','ka','ikaw','sila','tayo','nila'
+        ])
+        func_eng = int(t.lower() in [
+            'i','you','she','they','them','he','it','we','do','does','did','can','will','cannot','is',
+            'am','are','have','has','a','an','the','and','or','else','but','if','then','in','on','at','of','for','with'
+        ])
+        eng_letters = int(any(s in t.lower() for s in ['c','x','j','z','q','f']))
+
+        feats.append([
+            f_has_digit, f_has_hyphen, f_is_title, f_len, f_has_nonalpha,
+            f_vowel_ratio, suf_fil, suf_eng, pref_fil, pref_eng,
+            func_fil, func_eng, eng_letters
+        ])
     return np.array(feats, dtype=float)
 
 def main():
-    df = pd.read_excel(DATA_XLSX)
+    df = load_multiple_datasets(DATA_XLSX)
     df_proc = df.copy()
     if 'word' not in df_proc.columns:
         raise RuntimeError('Expected column "word" in dataset.')
@@ -114,7 +139,15 @@ def main():
     print(cm_test, "\n")
 
     # save model and vectorizer
-    joblib.dump({'clf':clf,'vec':vec,'manual_feature_names':['has_digit','has_hyphen','is_title','len','has_nonalpha','vowel_ratio','suf_fil','suf_eng']}, 'model.joblib')
+    joblib.dump({
+        'clf': clf,
+        'vec': vec,
+        'manual_feature_names': [
+            'has_digit','has_hyphen','is_title','len','has_nonalpha',
+            'vowel_ratio','suf_fil','suf_eng','pref_fil','pref_eng',
+            'func_fil','func_eng','eng_letters'
+        ]
+    }, 'model.joblib')
 
 if __name__=='__main__':
     main()
