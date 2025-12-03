@@ -191,8 +191,37 @@ if __name__ == "__main__":
     with open(filepath, "r", encoding="utf-8") as f:
         text = f.read().strip()
 
-    tokens = [t for t in text.split("|") if t.strip() != ""]
+    tokens = [t for t in text.replace("\n", "|").split("|") if t.strip() != ""]
     print("Tokens: ", tokens)
-    print("Tags:  ", tag_language(tokens))
-
+    tags = tag_language(tokens)
     
+    pred_tags = []
+    for t in tags:
+        if isinstance(t, (list, np.ndarray)):
+            for p in t:
+                pred_tags.append(str(p).strip().upper())
+        else:
+            pred_tags.append(str(t).strip().upper())
+            
+    print("Tags:  ", pred_tags)
+
+    fil_count = pred_tags.count("FIL")
+    oth_count = pred_tags.count("OTH")
+    eng_count = pred_tags.count("ENG")
+
+    print("FIL Count: ", fil_count)
+    print("OTH Count: ", oth_count)
+    print("ENG Count: ", eng_count)
+
+    filepath2 = r"test_sentences\test\test_labels.txt"
+    with open(filepath2, "r", encoding="utf-8") as f:
+        text = f.read().strip()
+    tags2 = [t for t in text.replace("\n", "|").split("|") if t.strip() != ""]
+    
+    fil_count2 = tags2.count("FIL")
+    oth_count2 = tags2.count("OTH")
+    eng_count2 = tags2.count("ENG")
+
+    print("FIL Count2: ", fil_count2)
+    print("OTH Count2: ", oth_count2)
+    print("ENG Count2: ", eng_count2)
