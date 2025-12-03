@@ -1,0 +1,1 @@
+For typo errors, it is acceptable for the Bot to label it as OTH.

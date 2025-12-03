@@ -187,9 +187,12 @@ if __name__ == "__main__":
     print("Tags :", tag_language(sample))
     """
     
-    print("Input a string: ", end="")
-    string = input().split()
-    print("Tokens:", string)
-    print("Tags:  ", tag_language(string))
+    filepath = r"test_sentences\test\test_data.txt"
+    with open(filepath, "r", encoding="utf-8") as f:
+        text = f.read().strip()
+
+    tokens = [t for t in text.split("|") if t.strip() != ""]
+    print("Tokens: ", tokens)
+    print("Tags:  ", tag_language(tokens))
 
     
