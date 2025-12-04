@@ -187,12 +187,17 @@ if __name__ == "__main__":
     print("Tags :", tag_language(sample))
     """
     
-    filepath = r"test_sentences\test\test_data.txt"
+    # Print tokens
+
+    filepath = r"bottesting\test_data.txt"
     with open(filepath, "r", encoding="utf-8") as f:
         text = f.read().strip()
 
     tokens = [t for t in text.replace("\n", "|").split("|") if t.strip() != ""]
     print("Tokens: ", tokens)
+
+    # Count actual tags
+
     tags = tag_language(tokens)
     
     pred_tags = []
@@ -209,11 +214,14 @@ if __name__ == "__main__":
     oth_count = pred_tags.count("OTH")
     eng_count = pred_tags.count("ENG")
 
-    print("FIL Count: ", fil_count)
-    print("OTH Count: ", oth_count)
-    print("ENG Count: ", eng_count)
+    print("Actual FIL Count: ", fil_count)
+    print("Actual OTH Count: ", oth_count)
+    print("Actual ENG Count: ", eng_count)
+    print()
 
-    filepath2 = r"test_sentences\test\test_labels.txt"
+    # Count expected tags
+    
+    filepath2 = r"bottesting\test_labels.txt"
     with open(filepath2, "r", encoding="utf-8") as f:
         text = f.read().strip()
     tags2 = [t for t in text.replace("\n", "|").split("|") if t.strip() != ""]
@@ -222,6 +230,88 @@ if __name__ == "__main__":
     oth_count2 = tags2.count("OTH")
     eng_count2 = tags2.count("ENG")
 
-    print("FIL Count2: ", fil_count2)
-    print("OTH Count2: ", oth_count2)
-    print("ENG Count2: ", eng_count2)
+    print("Expected FIL Count: ", fil_count2)
+    print("Expected OTH Count: ", oth_count2)
+    print("Expected ENG Count: ", eng_count2)
+    print()
+
+    # Warn if expected and actual tags have different sizes
+
+    if len(tags) != len(tags2):
+        print("WARNING: TAG COUNTS ARE NOT EQUAL LENGTH")
+
+    # Analyze with simulating confusion matrix
+
+    fil_TP = oth_TP = eng_TP = 0
+    fil_FP = oth_FP = eng_FP = 0
+    fil_FN = oth_FN = eng_FN = 0
+
+    # Count all metrics
+    for i in range(len(tags)):
+        expected = tags2[i]
+        actual = tags[i]
+        
+        # Count True Positives and False Negatives (for expected class)
+        if expected == "FIL":
+            if actual == "FIL":
+                fil_TP += 1
+            else:
+                fil_FN += 1 
+        elif expected == "OTH":
+            if actual == "OTH":
+                oth_TP += 1
+            else:
+                oth_FN += 1
+        elif expected == "ENG":
+            if actual == "ENG":
+                eng_TP += 1
+            else:
+                eng_FN += 1
+        
+        # Count False Positives (for actual class when it doesn't match expected)
+        if actual == "FIL" and expected != "FIL":
+            fil_FP += 1
+        elif actual == "OTH" and expected != "OTH":
+            oth_FP += 1
+        elif actual == "ENG" and expected != "ENG":
+            eng_FP += 1
+
+    print("FIL - TP:", fil_TP, "FP:", fil_FP, "FN:", fil_FN)
+    print("OTH - TP:", oth_TP, "FP:", oth_FP, "FN:", oth_FN)
+    print("ENG - TP:", eng_TP, "FP:", eng_FP, "FN:", eng_FN)
+    print()
+
+    # Calculate and print precision, recall, and F1
+    def calculate_metrics(tp, fp, fn):
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        return precision, recall, f1
+
+    # FIL metrics
+    fil_precision, fil_recall, fil_f1 = calculate_metrics(fil_TP, fil_FP, fil_FN)
+    print("FIL - Precision: {:.4f}, Recall: {:.4f}, F1: {:.4f}".format(
+        fil_precision, fil_recall, fil_f1))
+
+    # OTH metrics
+    oth_precision, oth_recall, oth_f1 = calculate_metrics(oth_TP, oth_FP, oth_FN)
+    print("OTH - Precision: {:.4f}, Recall: {:.4f}, F1: {:.4f}".format(
+        oth_precision, oth_recall, oth_f1))
+
+    # ENG metrics
+    eng_precision, eng_recall, eng_f1 = calculate_metrics(eng_TP, eng_FP, eng_FN)
+    print("ENG - Precision: {:.4f}, Recall: {:.4f}, F1: {:.4f}".format(
+        eng_precision, eng_recall, eng_f1))
+
+    # Calculate overall metrics
+    total_TP = fil_TP + oth_TP + eng_TP
+    total_FP = fil_FP + oth_FP + eng_FP
+    total_FN = fil_FN + oth_FN + eng_FN
+
+    overall_precision = total_TP / (total_TP + total_FP) if (total_TP + total_FP) > 0 else 0
+    overall_recall = total_TP / (total_TP + total_FN) if (total_TP + total_FN) > 0 else 0
+    overall_f1 = 2 * overall_precision * overall_recall / (overall_precision + overall_recall) if (overall_precision + overall_recall) > 0 else 0
+
+    print("\nOverall:")
+    print("Precision: {:.4f}, Recall: {:.4f}, F1: {:.4f}".format(
+        overall_precision, overall_recall, overall_f1))
